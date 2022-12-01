@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: $PROJECT_NAME
+  namespace: $NAMESPACE
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: $PROJECT_NAME
+  template:
+    metadata:
+      annotations:
+        kubernetes.io/change-cause: $DOCKER_TAG
+      creationTimestamp: null
+      labels:
+        app: $PROJECT_NAME
+    spec:  
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: $CONFIG_MAP
+        - secretRef:
+            name: $SECRET_REF
+        image: $DOCKER_TAG
+        imagePullPolicy: IfNotPresent
+        name: $PROJECT_NAME
+        ports:
+        - containerPort: 80
+          name: msg-port
+          protocol: TCP
+        resources:
+          limits:
+            cpu: "1"
+            memory: 1Gi
+          requests:
+            cpu: 500m
+            memory: 500Mi
+      imagePullSecrets:
+      - name: docker-hub.land.gov.bd
+      restartPolicy: Always
